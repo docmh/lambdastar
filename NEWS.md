@@ -1,3 +1,16 @@
+# lambdastar 0.8.2
+
+- Compute indicator disagreement before nuisance projection and row averaging.
+  Identical indicators now retain exact zero temperature on Apple Silicon,
+  including platforms without extended-precision row sums. Singular estimates
+  remain unavailable and bootstrap inference is skipped as intended.
+- Preserve genuinely small positive temperatures without a clipping tolerance,
+  and improve fluctuation accuracy in the presence of large shared profiles.
+- Add regression checks for double-precision averaging, independent pairwise
+  differences, indicator order, fixed references and response scaling.
+- Add GitHub Actions checks using native ARM64 R on macOS and R on Linux and
+  Windows, with downloadable check logs and platform details.
+
 # lambdastar 0.8.1
 
 - Correct README links to files included in the source package and remove the

@@ -41,11 +41,14 @@ estimate_lambda_star_items <- function(items,
   z <- .residualize_nuisance(shifted, nuisance_space)
   z_bar <- rowMeans(z)
   d <- nuisance_space$d
-  # A known origin cancels out of item disagreement. Compute it before the
-  # shift so even a distant reference cannot erase measurable fluctuation.
-  fluctuation_items <- if(is.null(origin)) z else .residualize_nuisance(items,nuisance_space)
-  fluctuation_mean <- if(is.null(origin)) z_bar else rowMeans(fluctuation_items)
-  deviations <- sweep(fluctuation_items, 1L, fluctuation_mean, "-")
+  # Item disagreement is unchanged by a common row profile or reference.
+  # Remove the first item before projection and row averaging: identical
+  # indicators then give exact zeros even without extended-precision sums.
+  # This also keeps a large common profile out of the fluctuation calculation,
+  # without rounding genuinely small positive temperatures down to zero.
+  item_offsets <- .finite(sweep(items, 1L, items[, 1L], "-"))
+  fluctuation_items <- .residualize_nuisance(item_offsets, nuisance_space)
+  deviations <- sweep(fluctuation_items, 1L, rowMeans(fluctuation_items), "-")
   sigma2_item <- .ssq(deviations) / (d * (k - 1L))
   temperature_mean <- sigma2_item / k
   if (any(deviations != 0) && temperature_mean == 0)

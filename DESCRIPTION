@@ -1,7 +1,7 @@
 Package: lambdastar
 Type: Package
 Title: Measurement and Linear Hypothesis Models for Lambda Star
-Version: 0.8.1
+Version: 0.8.2
 Authors@R: person("Mike", "Hammes", email = "mike.hammes@mikehammes.name", role = c("aut", "cre", "cph"))
 Description: Estimates intrinsic and captured noncentrality from parallel
     measurements and evaluates the numerical parsimony functional for an

@@ -2,7 +2,7 @@
 
 Eigenständiges R-Paket für den Mess- und Projektionskern von Lambda Star,
 das numerische Parsimony Functional und Personen-/Cluster-Bootstrap mit direkten
-Perzentilintervallen. Version **0.8.1** verwendet standardmäßig den
+Perzentilintervallen. Version **0.8.2** verwendet standardmäßig den
 Manuskriptschätzer für Punkte und sämtliche Ziehungen. Der alternative
 Populationsschätzer ist ausdrücklich wählbar. Nuisance-Effekte werden gemeinsam
 berücksichtigt. Alle Intervalle verwenden `ci.method="percentile"`.
@@ -35,7 +35,7 @@ Voraussetzung ist R >= 4.1 mit `stats` und dem empfohlenen R-Paket `boot`.
 Ein Source-Archiv kann mit `R CMD build .` im Paketverzeichnis erzeugt werden:
 
 ```r
-install.packages("lambdastar_0.8.1.tar.gz", repos = NULL, type = "source")
+install.packages("lambdastar_0.8.2.tar.gz", repos = NULL, type = "source")
 library(lambdastar)
 packageVersion("lambdastar")
 ```
@@ -430,7 +430,7 @@ Dokumentation und NAMESPACE sind bereits enthalten.
 
 ```sh
 R CMD build .
-R CMD check --as-cran lambdastar_0.8.1.tar.gz
+R CMD check --as-cran lambdastar_0.8.2.tar.gz
 ```
 
 Die Tests enthalten eine vorhandene synthetische Simulation und unabhängig

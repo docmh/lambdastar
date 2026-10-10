@@ -76,3 +76,58 @@ test("tiny positive temperature is not clipped to zero", {
   relative(tiny$lambda_star_raw, normal$lambda_star_raw)
   fails(estimate_lambda_star_items(a*1e-200), "numerical range")
 })
+
+
+test("identical indicators stay singular with double-precision row averaging", {
+  # Exercise the ARM64 accumulation precision on every platform. Only this
+  # private function copy uses the substitute; no namespace is modified.
+  double_row_means <- function(x) {
+    total <- numeric(nrow(x))
+    for (j in seq_len(ncol(x))) total <- total + x[, j]
+    total / ncol(x)
+  }
+  estimate <- estimate_lambda_star_items
+  environment(estimate) <- list2env(list(rowMeans = double_row_means),
+                                   parent = environment(estimate))
+  profile <- c(.1, .3, .7, 1.1, 1.3, 1.7, 2.1, 2.3, 2.7, 3.1, 3.3, 3.7)
+  nuisance <- cbind(1, rep(c(0, 1), each = 6))
+  for (k in c(3L, 5L, 7L)) {
+    items <- matrix(profile, nrow = length(profile), ncol = k)
+    for (origin in list(NULL, 1e8)) {
+      a <- estimate(items, nuisance = nuisance, reference = origin)
+      equal(a$status, "singular_temperature")
+      equal(a$temperature, 0)
+      stopifnot(is.na(a$lambda_star), is.na(a$lambda_star_raw))
+    }
+  }
+  items <- cbind(c(1, 2, 4, 3), c(2, 1, 3, 5))
+  normal <- estimate(items)
+  tiny <- estimate(items * 1e-100)
+  equal(tiny$status, "ok")
+  relative(tiny$temperature, normal$temperature * 1e-200)
+})
+
+test("temperature agrees with projected pairwise differences under large common profiles", {
+  n <- 24L
+  k <- 4L
+  x <- seq_len(n)
+  common <- 1e12 + sin(x) * 1e8
+  items <- sapply(seq_len(k), function(j) common + sin(x * j) / 8)
+  nuisance <- cbind(1, rep(c(0, 1), each = n / 2), x)
+  q <- qr(nuisance)
+  pair_energy <- apply(combn(k, 2L), 2L, function(j) {
+    residual <- qr.resid(q, items[, j[1L]] - items[, j[2L]])
+    sum(residual^2)
+  })
+  expected <- mean(pair_energy) / (2 * k * (n - q$rank))
+  a <- estimate_lambda_star_items(items, nuisance = nuisance)
+  relative(a$temperature, expected, tol = 1e-12)
+  for (order in list(k:1L, c(2L, 4L, 1L, 3L))) {
+    b <- estimate_lambda_star_items(items[, order], nuisance = nuisance)
+    relative(b$temperature, expected, tol = 1e-12)
+  }
+  fixed <- estimate_lambda_star_items(items, nuisance = nuisance, reference = 1e16)
+  relative(fixed$temperature, expected, tol = 1e-12)
+  item_scale <- estimate_lambda_star_items(items, scale = "item", nuisance = nuisance)
+  relative(item_scale$temperature, k * expected, tol = 1e-12)
+})
