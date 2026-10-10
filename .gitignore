@@ -1,9 +1,82 @@
+# Public repository: only package source, user documentation, tests and CI.
+# Private development history and project administration stay in the local repo.
+/*
+!/.gitignore
+!/.Rbuildignore
+!/DESCRIPTION
+!/NAMESPACE
+!/LICENSE.md
+!/README.md
+!/NEWS.md
+!/R/
+!/man/
+!/tests/
+!/inst/
+!/.github/
+
+# Only the package-check workflow belongs in the public GitHub configuration.
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/R-CMD-check.yaml
+
+# Only installed user documentation, examples and tutorials belong in inst/.
+/inst/*
+!/inst/doc/
+!/inst/examples/
+!/inst/tutorial/
+
+# Agent instructions, prompts, skills and configuration at any depth.
+[Aa][Gg][Ee][Nn][Tt][Ss]*.md
+[Cc][Ll][Aa][Uu][Dd][Ee]*.md
+[Gg][Ee][Mm][Ii][Nn][Ii]*.md
+[Ss][Kk][Ii][Ll][Ll]*.md
+copilot-instructions.md
+*.instructions.md
+*.prompt.md
+.agents/
+.codex/
+.claude/
+.cursor/
+.aider*/
+.aider*
+.gemini/
+.windsurf/
+.continue/
+.opencode/
+.cursorrules
+.windsurfrules
+.mcp.json
+mcp.json
+
+# Editor/workspace state and local R project files at any depth.
+.vscode/
+.idea/
+*.Rproj
+*.code-workspace
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
-.Rproj.user/
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Internal project plans, audit/validation reports, and generated evidence.
+IMPLEMENTIERUNGSPLAN*.md
+FORTSCHRITT*.md
+VALIDIERUNG*.md
+AUDIT*.md
+*_AUDIT.md
+*_VALIDATION.md
+*_DELIVERY.md
+/inst/doc/REFERENZIMPLEMENTIERUNG.md
+/dev/
+/validation/
+/dist/
+/inst/validation/
+/inst/tutorial/*.csv
 *.Rcheck/
-/lambdastar_*.tar.gz
 /check/
 /ci-environment.txt
-.DS_Store
+/lambdastar_*.tar.gz
