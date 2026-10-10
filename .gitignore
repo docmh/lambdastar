@@ -1,0 +1,9 @@
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+*.Rcheck/
+/lambdastar_*.tar.gz
+/check/
+/ci-environment.txt
+.DS_Store

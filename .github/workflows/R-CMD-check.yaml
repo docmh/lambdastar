@@ -1,0 +1,77 @@
+name: R-CMD-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: ${{ matrix.config.os }} / R ${{ matrix.config.r }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macos-15, r: release}
+          - {os: macos-15, r: oldrel-1}
+          - {os: macos-15, r: devel}
+          - {os: ubuntu-24.04, r: release}
+          - {os: ubuntu-24.04, r: devel}
+          - {os: windows-2022, r: release}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+      - name: Record environment and verify native Apple Silicon R
+        shell: Rscript {0}
+        run: |
+          details <- capture.output({
+            print(Sys.info())
+            print(R.version)
+            print(sessionInfo())
+            print(extSoftVersion())
+            print(.Machine[c("sizeof.longdouble", "longdouble.digits")])
+          })
+          writeLines(details, "ci-environment.txt")
+          cat(paste(details, collapse = "\n"), "\n")
+          if (Sys.info()[["sysname"]] == "Darwin") {
+            stopifnot(grepl("^(aarch64|arm64)$", R.version$arch))
+          }
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+      - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        env:
+          NOT_CRAN: "false"
+        with:
+          args: 'c("--no-manual", "--as-cran")'
+          build_args: '"--no-manual"'
+          error-on: '"warning"'
+          upload-results: true
+      - name: Upload platform details
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: environment-${{ matrix.config.os }}-${{ matrix.config.r }}
+          path: ci-environment.txt
+          if-no-files-found: ignore
+          retention-days: 30
